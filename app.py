@@ -13,7 +13,7 @@ LIFT_BASE_MPH = 14.0 # Example/demo value
 PAID_SHIFT_HOURS = 11.0 # Example/demo value
 
 st.title("🏭 Shipping Department Performance Forecasting")
-st.caption("Active Configurations: 11h Shifts Max | Base Standards: MP = 190 CPH, FDD = 185 CPH | Replen Standard: 14 Moves/Hour")
+st.caption("Active Configurations: 11h Shifts Max | Base Standards: Fresh Food = 190 CPH, Frozen Food = 185 CPH | Replen Standard: 14 Moves/Hour")
 
 st.markdown("---")
 
@@ -30,7 +30,7 @@ with col_slider_time:
 
 with col_slider_mp:
     mp_perf_contingency = st.slider(
-        "Expected MP Team Pace (%):",
+        "Expected Meat and Produce Team Pace (%):",
         min_value=50, max_value=160, value=120, step=5,
         help="Standard = 100%. Shift 5 fresh lines typically trend at a higher 120%+ velocity index."
     )
@@ -38,7 +38,7 @@ with col_slider_mp:
 
 with col_slider_fdd:
     fdd_perf_contingency = st.slider(
-        "Expected FDD Team Pace (%):",
+        "Expected Freezer/DairyDeli Team Pace (%):",
         min_value=50, max_value=160, value=100, step=5,
         help="Standard = 100%. Heavy cube cold-chain zones typically run closer to baseline limits."
     )
@@ -72,7 +72,7 @@ with col_in_support_mp:
     total_mp_support = int(mp_loaders + mp_wrappers + mp_chase)
 
 with col_in_support_fdd:
-    st.markdown("#### ❄️ FDD Support Headcount")
+    st.markdown("#### ❄️ Freezer/DairyDeli Support Headcount")
     fdd_loaders = st.number_input("FDD OutBound Dock Loaders:", min_value=0, max_value=50, value=1, step=1)
     fdd_wrappers = st.number_input("FDD Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
     fdd_chase = st.number_input("FDD Chase Runners:", min_value=0, max_value=10, value=1, step=1)
