@@ -135,34 +135,36 @@ with kpi1:
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
 
-# DYNAMIC HTML CONTAINER COLORS BASED ON PERFORMANCE GOALS
-# MP Threshold Check (Standard: 190 CPH)
+# Color setup for MP (Goal: 190 CPH)
 if expected_mp_cph >= 190.0:
-    mp_bg, mp_border, mp_text = "#dcfce7", "#22c55e", "#15803d" # Green Alert
+    mp_bg, mp_border, mp_text = "#dcfce7", "#22c55e", "#15803d"
 else:
-    mp_bg, mp_border, mp_text = "#fde8e8", "#f87171", "#9b1c1c" # Red Alert
+    mp_bg, mp_border, mp_text = "#fde8e8", "#f87171", "#9b1c1c"
 
-# FDD Threshold Check (Standard: 185 CPH)
+# Color setup for FDD (Goal: 185 CPH)
 if expected_fdd_cph >= 185.0:
-    fdd_bg, fdd_border, fdd_text = "#dcfce7", "#22c55e", "#15803d" # Green Alert
+    fdd_bg, fdd_border, fdd_text = "#dcfce7", "#22c55e", "#15803d"
 else:
-    fdd_bg, fdd_border, fdd_text = "#fde8e8", "#f87171", "#9b1c1c" # Red Alert
+    fdd_bg, fdd_border, fdd_text = "#fde8e8", "#f87171", "#9b1c1c"
 
+# FIXED HTML STRINGS BY ESCAPING STYLES
 with kpi3:
-    st.markdown(f"""
-        <div style="background-color:{mp_bg}; border: 2px solid {mp_border}; border-radius: 8px; padding: 15px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>
-            <h2 style="margin: 5px 0 0 0; color: {mp_text}; font-size: 26px; font-weight: 700;">{round(expected_mp_cph, 1)} CPH</h2>
-        </div>
-    """, unsafe_html=True)
+    st.markdown(
+        '<div style="background-color:' + mp_bg + '; border: 2px solid ' + mp_border + '; border-radius: 8px; padding: 15px; text-align: center;">'
+        '<p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>'
+        '<h2 style="margin: 5px 0 0 0; color: ' + mp_text + '; font-size: 26px; font-weight: 700;">' + str(round(expected_mp_cph, 1)) + ' CPH</h2>'
+        '</div>', 
+        unsafe_html=True
+    )
 
 with kpi4:
-    st.markdown(f"""
-        <div style="background-color:{fdd_bg}; border: 2px solid {fdd_border}; border-radius: 8px; padding: 15px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>
-            <h2 style="margin: 5px 0 0 0; color: {fdd_text}; font-size: 26px; font-weight: 700;">{round(expected_fdd_cph, 1)} CPH</h2>
-        </div>
-    """, unsafe_html=True)
+    st.markdown(
+        '<div style="background-color:' + fdd_bg + '; border: 2px solid ' + fdd_border + '; border-radius: 8px; padding: 15px; text-align: center;">'
+        '<p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>'
+        '<h2 style="margin: 5px 0 0 0; color: ' + fdd_text + '; font-size: 26px; font-weight: 700;">' + str(round(expected_fdd_cph, 1)) + ' CPH</h2>'
+        '</div>', 
+        unsafe_html=True
+    )
 
 with kpi5:
     st.metric(label="Projected Shift Length", value=f"{hours_int}h {mins_int}m")
