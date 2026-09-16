@@ -1,6 +1,3 @@
-Yep. Here’s the same code with **all the comments I added removed**:
-
-```
 import math
 
 import pandas as pd
