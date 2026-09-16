@@ -586,12 +586,3 @@ st.dataframe(
     use_container_width=True,
     hide_index=True
 )
-
-st.markdown("---")
-
-st.caption(
-    "Portfolio project using illustrative operational standards and "
-    "simulated planning inputs. Designed for demonstration of Python, "
-    "Streamlit, data analysis, and operational decision-support concepts."
-)
-
