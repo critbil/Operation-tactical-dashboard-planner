@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import math
 
-st.set_page_config(page_title="Commodity-Isolated Command Center", layout="wide")
+st.set_page_config(page_title="Perishable Shipping Performance Planner", layout="wide")
 
 is_shared_view = st.query_params.get("mode") == "shared"
 
@@ -12,7 +12,7 @@ FDD_BASE_CPH = 185.0
 LIFT_BASE_MPH = 14.0
 PAID_SHIFT_HOURS = 11.0
 
-st.title("🏭 Shipping Department Commodity-Isolated Command Center")
+st.title("🏭 Shipping Department Performance Forcasting")
 st.caption("Active Configurations: 11h Shifts Max | Base Standards: MP = 190 CPH, FDD = 185 CPH | Replen Standard: 14 Moves/Hour")
 
 st.markdown("---")
@@ -57,7 +57,7 @@ with col_in_cases:
     total_cases = mp_cases + fdd_cases
 
 with col_in_moves:
-    st.markdown("#### 🚜 Stock Replenishment Moves")
+    st.markdown("#### 🚜 Replenishment Moves")
     meat_moves = st.number_input("Expected Meat Lift Moves:", min_value=0, max_value=1000, value=330, step=10)
     produce_moves = st.number_input("Expected Produce Lift Moves:", min_value=0, max_value=1000, value=410, step=10)
     dairy_deli_moves = st.number_input("Expected Dairy/Deli Lift Moves:", min_value=0, max_value=1000, value=180, step=10)
@@ -73,9 +73,9 @@ with col_in_support_mp:
 
 with col_in_support_fdd:
     st.markdown("#### ❄️ FDD Support Headcount")
-    fdd_loaders = st.number_input("FDD Cold-Chain Loaders:", min_value=0, max_value=50, value=1, step=1)
-    fdd_wrappers = st.number_input("FDD Cold-Chain Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    fdd_chase = st.number_input("FDD Cold-Chain Chase Runners:", min_value=0, max_value=10, value=1, step=1)
+    fdd_loaders = st.number_input("FDD OutBound Dock Loaders:", min_value=0, max_value=50, value=1, step=1)
+    fdd_wrappers = st.number_input("FDD Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
+    fdd_chase = st.number_input("FDD Chase Runners:", min_value=0, max_value=10, value=1, step=1)
     total_fdd_support = int(fdd_loaders + fdd_wrappers + fdd_chase)
 
 st.markdown("---")
@@ -127,7 +127,7 @@ expected_mp_cph = mp_cases / mp_active_labor_hours if mp_active_labor_hours > 0 
 expected_fdd_cph = fdd_cases / fdd_active_labor_hours if fdd_active_labor_hours > 0 else 0.0
 
 # --- CORE SUMMARY KPI METRICS BAR ---
-st.markdown("### 🧮 Step 3: Core Performance Projections")
+st.markdown("### 🧮 Step 3: Performance Projections")
 kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 
 with kpi1:
@@ -167,7 +167,7 @@ with kpi5:
 st.markdown("---")
 
 # --- CONSOLIDATED CROSS-COMMODITY ROSTER TARGETS ---
-st.subheader("📋 Floor Management Deployment Blueprint")
+st.subheader("📋 Floor Management Production Analysis")
 
 # CLEAN RE-MAPPED COMPILING DICTIONARY MATRIX
 blueprint_matrix = [
