@@ -65,7 +65,7 @@ with col_in_moves:
     total_moves = meat_moves + produce_moves + dairy_deli_moves + freezer_moves
 
 with col_in_support_mp:
-    st.markdown("#### 🛠️ MP Support Headcount")
+    st.markdown("#### 🥩 MP Support Headcount")
     mp_loaders = st.number_input("MP Outbound Dock Loaders:", min_value=0, max_value=50, value=3, step=1)
     mp_wrappers = st.number_input("MP Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
     mp_chase = st.number_input("MP Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
