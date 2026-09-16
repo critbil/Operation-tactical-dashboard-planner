@@ -133,7 +133,7 @@ kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 with kpi1:
     st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Order-Fillers")
 with kpi2:
-    st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
+    st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Lift Drivers")
 
 # Color setups
 mp_color = "#15803d" if expected_mp_cph >= 190.0 else "#9b1c1c"
