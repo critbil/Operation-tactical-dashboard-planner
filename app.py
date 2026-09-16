@@ -135,38 +135,32 @@ with kpi1:
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
 
-# Color setup for MP (Goal: 190 CPH)
-if expected_mp_cph >= 190.0:
-    mp_bg, mp_border, mp_text = "#dcfce7", "#22c55e", "#15803d"
-else:
-    mp_bg, mp_border, mp_text = "#fde8e8", "#f87171", "#9b1c1c"
+# Clean logic checks to assign alert parameters safely
+mp_color = "#15803d" if expected_mp_cph >= 190.0 else "#9b1c1c"
+mp_bg = "#dcfce7" if expected_mp_cph >= 190.0 else "#fde8e8"
 
-# Color setup for FDD (Goal: 185 CPH)
-if expected_fdd_cph >= 185.0:
-    fdd_bg, fdd_border, fdd_text = "#dcfce7", "#22c55e", "#15803d"
-else:
-    fdd_bg, fdd_border, fdd_text = "#fde8e8", "#f87171", "#9b1c1c"
+fdd_color = "#15803d" if expected_fdd_cph >= 185.0 else "#9b1c1c"
+fdd_bg = "#dcfce7" if expected_fdd_cph >= 185.0 else "#fde8e8"
 
-# ROUNDED PERFORMANCE VALUES
-final_mp_val = round(expected_mp_cph, 1)
-final_fdd_val = round(expected_fdd_cph, 1)
+final_mp_val = str(round(expected_mp_cph, 1))
+final_fdd_val = str(round(expected_fdd_cph, 1))
 
-# FIXED: Standardized F-String HTML Containers using escaped double curly braces {{}}
+# SAFELY RENDERING BOXES VIA NATIVE STREAMLIT HTML METHOD
 with kpi3:
-    st.markdown(f"""
-        <div style="background-color: {mp_bg}; border: 2px solid {mp_border}; border-radius: 8px; padding: 15px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>
-            <h2 style="margin: 5px 0 0 0; color: {mp_text}; font-size: 26px; font-weight: 700;">{final_mp_val} CPH</h2>
-        </div>
-    """, unsafe_html=True)
+    st.html(
+        f'<div style="background-color: {mp_bg}; border: 2px solid {mp_color}; border-radius: 8px; padding: 12px; text-align: center;">'
+        f'<p style="margin: 0; font-size: 13px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>'
+        f'<h2 style="margin: 4px 0 0 0; color: {mp_color}; font-size: 24px; font-weight: 700;">{final_mp_val} CPH</h2>'
+        f'</div>'
+    )
 
 with kpi4:
-    st.markdown(f"""
-        <div style="background-color: {fdd_bg}; border: 2px solid {fdd_border}; border-radius: 8px; padding: 15px; text-align: center;">
-            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>
-            <h2 style="margin: 5px 0 0 0; color: {fdd_text}; font-size: 26px; font-weight: 700;">{final_fdd_val} CPH</h2>
-        </div>
-    """, unsafe_html=True)
+    st.html(
+        f'<div style="background-color: {fdd_bg}; border: 2px solid {fdd_color}; border-radius: 8px; padding: 12px; text-align: center;">'
+        f'<p style="margin: 0; font-size: 13px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>'
+        f'<h2 style="margin: 4px 0 0 0; color: {fdd_color}; font-size: 24px; font-weight: 700;">{final_fdd_val} CPH</h2>'
+        f'</div>'
+    )
 
 with kpi5:
     st.metric(label="Projected Shift Length", value=f"{hours_int}h {mins_int}m")
