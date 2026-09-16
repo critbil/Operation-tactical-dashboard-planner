@@ -2,7 +2,7 @@
 
 ## 🚀 Live Dashboard
 
-[View the Interactive Streamlit Dashboard](https://operations-analytics-dashboard-planner-mndoznzswtjdb4cbwzhvct.streamlit.app/)
+[View the Live Dashboard](https://operations-analytics-dashboard-planner-mndoznzswtjdb4cbwzhvct.streamlit.app/)
 
 ## 📊 Project Overview
 
