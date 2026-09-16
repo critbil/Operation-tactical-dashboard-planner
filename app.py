@@ -4,19 +4,21 @@ import math
 
 st.set_page_config(page_title="Shipping & Replen Command Center", layout="wide")
 
+is_shared_view = st.query_params.get("mode") == "shared"
+
 # --- GLOBAL STATIC OPERATIONAL PARAMETERS ---
 MP_BASE_CPH = 190.0
 FDD_BASE_CPH = 185.0
 LIFT_BASE_MPH = 14.0
 PAID_SHIFT_HOURS = 11.0
 
-# --- DASHBOARD HEADER ---
+# --- TITLE BANNER ---
 st.title("🏭 Shipping Department Labor & Capacity Command Center")
 st.caption("Active Configurations: 11h Shifts Max | MP Standard: 190 CPH | FDD Standard: 185 CPH | Replen Standard: 14 Moves/Hour")
 
 st.markdown("---")
 
-# --- CONTROL ROOM: LIVE INPUT CONFIGURATION PANELS ---
+# --- CONTROL ROOM: LIVE INPUT PANELS ---
 st.markdown("### ⚙️ Step 1: Configure Shift Run & Pacing Contingencies")
 col_in_time, col_in_contingency = st.columns(2)
 
@@ -57,7 +59,6 @@ with col_in_moves:
 
 with col_in_support:
     st.markdown("#### 🛠️ Scheduled Support Headcount")
-    # VISIBLE MANUAL ENTRANCE FIELDS FOR FIXED SUPPORT STAFF POSITIONS
     loaders_count = st.number_input("Actual Outbound Dock Loaders:", min_value=0, max_value=50, value=4, step=1)
     wrappers_count = st.number_input("Actual Pallet Wrappers:", min_value=0, max_value=50, value=2, step=1)
     chase_count = st.number_input("Actual Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
@@ -94,22 +95,22 @@ total_scheduled_lifts = round(total_required_replen_hours / target_active_hours,
 
 # 3. Calculate Projected Shift Length (Picker-gated runtime timeline)
 if total_scheduled_pickers > 0:
-    expected_shift_length_hours = (total_required_pick_hours / total_scheduled_pickers) + 1.0 # 1 hr break included
+    expected_shift_length_hours = (total_required_pick_hours / total_scheduled_pickers) + 1.0 
 else:
     expected_shift_length_hours = 0.0
 hours_int = int(expected_shift_length_hours)
 mins_int = int((expected_shift_length_hours - hours_int) * 60)
 
-# 4. ALL LABOR COMPILATION: Total Combined Building Pool Headcount
+# 4. Total Combined Building Pool Headcount
 total_building_headcount = total_scheduled_pickers + total_scheduled_lifts + total_fixed_support_headcount
 
-# 5. ALL LABOR COMPILATION: Total Active Floor Hours (Excluding the 1-hour break window)
+# 5. REFINED EXCLUSION LOGIC: Calculate active floor hours EXCLUDING lift operators completely
 active_run_hours = max(0.0, expected_shift_length_hours - 1.0)
-total_building_active_hours_pool = total_building_headcount * active_run_hours
+shipping_only_active_hours_pool = (total_scheduled_pickers + total_fixed_support_headcount) * active_run_hours
 
-# 6. DYNAMIC OUTPUT: True Burdened Expected Building CPH for the Day (All Labor Included)
-if total_building_active_hours_pool > 0:
-    expected_building_cph = total_cases / total_building_active_hours_pool
+# 6. DYNAMIC OUTPUT: True Burdened Shipping CPH (Pickers + Loaders + Wrappers + Chase Runners)
+if shipping_only_active_hours_pool > 0:
+    expected_building_cph = total_cases / shipping_only_active_hours_pool
 else:
     expected_building_cph = 0.0
 
@@ -124,11 +125,11 @@ with kpi2:
 with kpi3:
     st.metric(label="Total Expected Moves", value=f"{total_moves} Pallets")
 with kpi4:
-    # COMPILING ALL LABOR FOR DYNAMIC OUTPUT
+    # EXCLUDED REPLEN LIFT DRIVERS FROM THIS KPI BOX CALCULATION
     st.metric(
-        label="Expected Daily Building CPH", 
+        label="Expected Daily Shipping CPH", 
         value=f"{round(expected_building_cph, 1)} CPH",
-        help="All Labor Included: Total Outbound Cases divided by Total Combined Shift Work Hours (Pickers + Lift Drivers + Loaders + Wrappers + Chase Runners)."
+        help="Shipping Department Efficiency Index: Total Outbound Cases divided by Active Floor Hours (Pickers + Loaders + Wrappers + Chase Runners). Lift Drivers are completely excluded from this calculation."
     )
 with kpi5:
     st.metric(label="Projected Roster Run-Time", value=f"{hours_int}h {mins_int}m")
