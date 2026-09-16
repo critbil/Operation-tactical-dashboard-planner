@@ -29,7 +29,6 @@ with col_slider_time:
     )
 
 with col_slider_mp:
-    # Restored to the Top Control Room: Independent Meat & Produce Pace Slider
     mp_perf_contingency = st.slider(
         "Expected MP Team Pace (%):",
         min_value=50, max_value=160, value=120, step=5,
@@ -38,7 +37,6 @@ with col_slider_mp:
     mp_multiplier = mp_perf_contingency / 100.0
 
 with col_slider_fdd:
-    # Restored to the Top Control Room: Independent Freezer, Dairy, Deli Pace Slider
     fdd_perf_contingency = st.slider(
         "Expected FDD Team Pace (%):",
         min_value=50, max_value=160, value=100, step=5,
@@ -71,18 +69,18 @@ with col_in_support_mp:
     mp_loaders = st.number_input("MP Outbound Dock Loaders:", min_value=0, max_value=50, value=3, step=1)
     mp_wrappers = st.number_input("MP Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
     mp_chase = st.number_input("MP Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
-    total_mp_support = mp_loaders + mp_wrappers + mp_chase
+    total_mp_support = int(mp_loaders + mp_wrappers + mp_chase)
 
 with col_in_support_fdd:
     st.markdown("#### ❄️ FDD Support Headcount")
     fdd_loaders = st.number_input("FDD Cold-Chain Loaders:", min_value=0, max_value=50, value=1, step=1)
     fdd_wrappers = st.number_input("FDD Cold-Chain Wrappers:", min_value=0, max_value=50, value=1, step=1)
     fdd_chase = st.number_input("FDD Cold-Chain Chase Runners:", min_value=0, max_value=10, value=1, step=1)
-    total_fdd_support = fdd_loaders + fdd_wrappers + fdd_chase
+    total_fdd_support = int(fdd_loaders + fdd_wrappers + fdd_chase)
 
 st.markdown("---")
 
-# --- SHIPPING WORKFORCE FORECAST MATH ENGINE (COMMODITY BIASED) ---
+# --- SHIPPING WORKFORCE FORECAST MATH ENGINE ---
 live_mp_cph = MP_BASE_CPH * mp_multiplier
 live_fdd_cph = FDD_BASE_CPH * fdd_multiplier
 
@@ -94,9 +92,9 @@ mp_pick_hours_needed = mp_cases / live_mp_cph
 fdd_pick_hours_needed = fdd_cases / live_fdd_cph
 total_required_pick_hours = mp_pick_hours_needed + fdd_pick_hours_needed
 
-scheduled_mp_pickers = math.ceil(mp_pick_hours_needed / target_active_hours)
-scheduled_fdd_pickers = math.ceil(fdd_pick_hours_needed / target_active_hours)
-total_scheduled_pickers = scheduled_mp_pickers + scheduled_fdd_pickers
+scheduled_mp_pickers = int(math.ceil(mp_pick_hours_needed / target_active_hours))
+scheduled_fdd_pickers = int(math.ceil(fdd_pick_hours_needed / target_active_hours))
+total_scheduled_pickers = int(scheduled_mp_pickers + scheduled_fdd_pickers)
 
 # 2. Lift Replenishment Labor Calculations (Exact Decimal Capacities)
 meat_replen_hours = meat_moves / live_mp_replen_mph
@@ -105,13 +103,13 @@ dairy_deli_replen_hours = dairy_deli_moves / live_fdd_replen_mph
 freezer_replen_hours = freezer_moves / live_fdd_replen_mph
 total_required_replen_hours = meat_replen_hours + produce_replen_hours + dairy_deli_replen_hours + freezer_replen_hours
 
-scheduled_meat_lifts = round(meat_replen_hours / target_active_hours, 1)
-scheduled_produce_lifts = round(produce_replen_hours / target_active_hours, 1)
-scheduled_dairy_deli_lifts = round(dairy_deli_replen_hours / target_active_hours, 1)
-scheduled_freezer_lifts = round(freezer_replen_hours / target_active_hours, 1)
-total_scheduled_lifts = round(total_required_replen_hours / target_active_hours, 1)
+scheduled_meat_lifts = round(float(meat_replen_hours / target_active_hours), 1)
+scheduled_produce_lifts = round(float(produce_replen_hours / target_active_hours), 1)
+scheduled_dairy_deli_lifts = round(float(dairy_deli_replen_hours / target_active_hours), 1)
+scheduled_freezer_lifts = round(float(freezer_replen_hours / target_active_hours), 1)
+total_scheduled_lifts = round(float(total_required_replen_hours / target_active_hours), 1)
 
-# 3. Calculate Projected Shift Length (Picker-gated runtime timeline)
+# 3. Calculate Projected Shift Length
 if total_scheduled_pickers > 0:
     expected_shift_length_hours = (total_required_pick_hours / total_scheduled_pickers) + 1.0 
 else:
@@ -119,7 +117,7 @@ else:
 hours_int = int(expected_shift_length_hours)
 mins_int = int((expected_shift_length_hours - hours_int) * 60)
 
-# 4. REFINED COMMODITY CPH MATHEMATICS (Lifts Completely Excluded)
+# 4. REFINED COMMODITY CPH MATHEMATICS
 active_run_hours = max(0.0, expected_shift_length_hours - 1.0)
 
 mp_active_labor_hours = (scheduled_mp_pickers + total_mp_support) * active_run_hours
@@ -137,9 +135,9 @@ with kpi1:
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
 with kpi3:
-    st.metric(label="Expected MP Shipping CPH", value=f"{round(expected_mp_cph, 1)} CPH", help="MP Cases divided by (MP Pickers + MP Support Staff) active hours pool.")
+    st.metric(label="Expected MP Shipping CPH", value=f"{round(expected_mp_cph, 1)} CPH")
 with kpi4:
-    st.metric(label="Expected FDD Shipping CPH", value=f"{round(expected_fdd_cph, 1)} CPH", help="FDD Cases divided by (FDD Pickers + FDD Support Staff) active hours pool.")
+    st.metric(label="Expected FDD Shipping CPH", value=f"{round(expected_fdd_cph, 1)} CPH")
 with kpi5:
     st.metric(label="Projected Shift Length", value=f"{hours_int}h {mins_int}m")
 
@@ -160,7 +158,10 @@ st.markdown("---")
 
 # --- CONSOLIDATED DEPARTMENT POOL OVERHEAD LEDGER ---
 st.subheader("📋 Total Shipping Department Roster Pool Ledger")
-total_all_staff = total_scheduled_pickers + total_scheduled_lifts + total_mp_support + total_fdd_support
+# FIXED MATRIX FLOAT COMPILING TYPO
+total_all_staff = float(total_scheduled_pickers) + float(total_scheduled_lifts) + float(total_mp_support) + float(total_fdd_support)
+
 roster_matrix = [
-    {"Shipping Department Role Block": "Orderfillers (Direct Pickers)", "Scheduled Headcount Pool": f"{total_scheduled_pickers} Staff", "Paid Hours Burden Pool": f"{total_scheduled_pickers * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
+    {"Shipping Department Role Block": "Orderfillers (Direct Pickers)", "Scheduled Headcount Pool": f"{total_scheduled_pickers} Staff", "Paid Hours Burden Pool": f"{round(total_scheduled_pickers * PAID_SHIFT_HOURS, 1)} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
+    {"Shipping Department Role Block": "Forklift Operators (Replen Drivers)", "Scheduled Headcount Pool": f"{total_scheduled_lifts} Staff", "Paid Hours Burden Pool": f"{round(total_scheduled_lifts * PAID_SHIFT_HOURS, 1)} Hrs", "Role Allocation Type": "Variable (Exact Decimals)"},
 ]
