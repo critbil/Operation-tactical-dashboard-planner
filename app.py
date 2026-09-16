@@ -49,7 +49,7 @@ with col_in_cases:
     total_cases = mp_cases + fdd_cases
 
 with col_in_moves:
-    st.markdown("#### 🚜 Stock Replenishment Moves")
+    st.markdown("#### 🚜 Replenishment Moves")
     meat_moves = st.number_input("Expected Meat Lift Moves:", min_value=0, max_value=1000, value=330, step=10)
     produce_moves = st.number_input("Expected Produce Lift Moves:", min_value=0, max_value=1000, value=410, step=10)
     dairy_deli_moves = st.number_input("Expected Dairy/Deli Lift Moves:", min_value=0, max_value=1000, value=120, step=10)
@@ -65,9 +65,9 @@ with col_in_support_mp:
 
 with col_in_support_fdd:
     st.markdown("#### ❄️ FDD Support Headcount")
-    fdd_loaders = st.number_input("FDD Cold Loaders:", min_value=0, max_value=50, value=2, step=1)
-    fdd_wrappers = st.number_input("FDD Cold Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    fdd_chase = st.number_input("FDD Cold Chase Runners:", min_value=0, max_value=10, value=1, step=1)
+    fdd_loaders = st.number_input("FDD Dock Loaders:", min_value=0, max_value=50, value=2, step=1)
+    fdd_wrappers = st.number_input("FDD Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
+    fdd_chase = st.number_input("FDD Chase Runners:", min_value=0, max_value=10, value=1, step=1)
     total_fdd_support = fdd_loaders + fdd_wrappers + fdd_chase
 
 st.markdown("---")
@@ -121,7 +121,7 @@ st.markdown("### 🧮 Step 3: Core Performance Projections")
 kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 
 with kpi1:
-    st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Crew")
+    st.metric(label="Total Required Order-Fillers", value=f"{total_scheduled_pickers} Crew")
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
 with kpi3:
@@ -150,7 +150,7 @@ st.markdown("---")
 st.subheader("📋 Total Shipping Department Roster")
 total_all_staff = total_scheduled_pickers + total_scheduled_lifts + total_mp_support + total_fdd_support
 roster_matrix = [
-    {"Shipping Department Role Block": "Orderfillers (Direct Pickers)", "Scheduled Headcount Pool": f"{total_scheduled_pickers} Staff", "Paid Hours Burden Pool": f"{total_scheduled_pickers * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
-    {"Shipping Department Role Block": "Forklift Operators (Replen Drivers)", "Scheduled Headcount Pool": f"{total_scheduled_lifts} Staff", "Paid Hours Burden Pool": f"{total_scheduled_lifts * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Exact Decimals)"},
-    {"Shipping Department Role Block": "MP Outbound Support (Load/Wrap/Chase)", "Scheduled Headcount Pool": f"{total_mp_support} Staff", "Paid Hours Burden Pool": f"{total_mp_support * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (MP Dock)"},
+    {"Shipping Department Role ": "Orderfillers (Direct Pickers)", "Scheduled Headcount": f"{total_scheduled_pickers} Staff", "Paid Hours Pool": f"{total_scheduled_pickers * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
+    {"Shipping Department Role ": "Forklift Operators (Replen Drivers)", "Scheduled Headcount": f"{total_scheduled_lifts} Staff", "Paid Hours Pool": f"{total_scheduled_lifts * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Exact Decimals)"},
+    {"Shipping Department Role ": "MP Outbound Support (Load/Wrap/Chase)", "Scheduled Headcount": f"{total_mp_support} Staff", "Paid Hours Pool": f"{total_mp_support * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (MP Dock)"},
 ]
