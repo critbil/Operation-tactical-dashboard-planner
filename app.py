@@ -134,10 +134,36 @@ with kpi1:
     st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Crew")
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
+
+# DYNAMIC HTML CONTAINER COLORS BASED ON PERFORMANCE GOALS
+# MP Threshold Check (Standard: 190 CPH)
+if expected_mp_cph >= 190.0:
+    mp_bg, mp_border, mp_text = "#dcfce7", "#22c55e", "#15803d" # Green Alert
+else:
+    mp_bg, mp_border, mp_text = "#fde8e8", "#f87171", "#9b1c1c" # Red Alert
+
+# FDD Threshold Check (Standard: 185 CPH)
+if expected_fdd_cph >= 185.0:
+    fdd_bg, fdd_border, fdd_text = "#dcfce7", "#22c55e", "#15803d" # Green Alert
+else:
+    fdd_bg, fdd_border, fdd_text = "#fde8e8", "#f87171", "#9b1c1c" # Red Alert
+
 with kpi3:
-    st.metric(label="Expected MP Shipping CPH", value=f"{round(expected_mp_cph, 1)} CPH")
+    st.markdown(f"""
+        <div style="background-color:{mp_bg}; border: 2px solid {mp_border}; border-radius: 8px; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>
+            <h2 style="margin: 5px 0 0 0; color: {mp_text}; font-size: 26px; font-weight: 700;">{round(expected_mp_cph, 1)} CPH</h2>
+        </div>
+    """, unsafe_html=True)
+
 with kpi4:
-    st.metric(label="Expected FDD Shipping CPH", value=f"{round(expected_fdd_cph, 1)} CPH")
+    st.markdown(f"""
+        <div style="background-color:{fdd_bg}; border: 2px solid {fdd_border}; border-radius: 8px; padding: 15px; text-align: center;">
+            <p style="margin: 0; font-size: 14px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>
+            <h2 style="margin: 5px 0 0 0; color: {fdd_text}; font-size: 26px; font-weight: 700;">{round(expected_fdd_cph, 1)} CPH</h2>
+        </div>
+    """, unsafe_html=True)
+
 with kpi5:
     st.metric(label="Projected Shift Length", value=f"{hours_int}h {mins_int}m")
 
@@ -150,6 +176,4 @@ blueprint_matrix = [
     {"Commodity Zone Area": "Produce (P)", "Pacing Target Standard": f"{round(live_mp_cph)} CPH / {round(live_mp_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(mp_cases * 0.45):,} Cases*", "Orderfillers Needed": f"{math.ceil((mp_pick_hours_needed * 0.45) / target_active_hours)} Staff", "Replen Moves Count": f"{produce_moves} Moves", "Replen Drivers Needed": f"{scheduled_produce_lifts} Lifts"},
     {"Commodity Zone Area": "Dairy & Deli (DD)", "Pacing Target Standard": f"{round(live_fdd_cph)} CPH / {round(live_fdd_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(fdd_cases * 0.55):,} Cases*", "Orderfillers Needed": f"{math.ceil((fdd_pick_hours_needed * 0.55) / target_active_hours)} Staff", "Replen Moves Count": f"{dairy_deli_moves} Moves", "Replen Drivers Needed": f"{scheduled_dairy_deli_lifts} Lifts"},
     {"Commodity Zone Area": "Freezer (F)", "Pacing Target Standard": f"{round(live_fdd_cph)} CPH / {round(live_fdd_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(fdd_cases * 0.45):,} Cases*", "Orderfillers Needed": f"{math.ceil((fdd_pick_hours_needed * 0.45) / target_active_hours)} Staff", "Replen Moves Count": f"{freezer_moves} Moves", "Replen Drivers Needed": f"{scheduled_freezer_lifts} Lifts"},
-    {"Commodity Zone Area": "📊 TOTAL ACTIVE POOL", "Pacing Target Standard": "Synchronized Matrix", "Outbound Case Load": f"{int(total_cases):,} Cases", "Orderfillers Needed": f"{total_scheduled_pickers} Pickers", "Replen Moves Count": f"{total_moves} Moves", "Replen Drivers Needed": f"{total_scheduled_lifts} Lift Drivers"}
 ]
-st.dataframe(pd.DataFrame(blueprint_matrix), use_container_width=True, hide_index=True)
