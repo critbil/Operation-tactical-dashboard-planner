@@ -155,3 +155,4 @@ roster_matrix = [
     {"Shipping Department Role Block": "Forklift Operators (Replen Drivers)", "Scheduled Headcount Pool": f"{total_scheduled_lifts} Staff", "Paid Hours Burden Pool": f"{total_scheduled_lifts * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Exact Decimal Capacities)"},
     {"Shipping Department Role Block": "Outbound Dock Loaders", "Scheduled Headcount Pool": f"{loaders_count} Staff", "Paid Hours Burden Pool": f"{loaders_count * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (Manager Manual Input)"},
     {"Shipping Department Role Block": "Pallet Wrappers", "Scheduled Headcount Pool": f"{wrappers_count} Staff", "Paid Hours Burden Pool": f"{wrappers_count * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (Manager Manual Input)"},
+]
