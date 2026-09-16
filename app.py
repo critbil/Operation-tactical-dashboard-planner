@@ -131,7 +131,7 @@ st.markdown("### 🧮 Step 3: Performance Projections")
 kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 
 with kpi1:
-    st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Crew")
+    st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Order-Fillers")
 with kpi2:
     st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Drivers")
 
