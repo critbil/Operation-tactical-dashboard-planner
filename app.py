@@ -1,179 +1,600 @@
-import streamlit as st
-import pandas as pd
+Yep. Here’s the same code with **all the comments I added removed**:
+
+```
 import math
 
-st.set_page_config(page_title="Perishable Shipping Performance Planner", layout="wide")
+import pandas as pd
+import streamlit as st
 
-is_shared_view = st.query_params.get("mode") == "shared"
+st.set_page_config(
+    page_title="Operations Analytics & Performance Dashboard",
+    layout="wide"
+)
 
-# --- GLOBAL STATIC OPERATIONAL PARAMETERS ---
-MP_BASE_CPH = 190.0 # Example/demo value
-FDD_BASE_CPH = 185.0 # Example/demo value
-LIFT_BASE_MPH = 14.0 # Example/demo value
-PAID_SHIFT_HOURS = 11.0 # Example/demo value
+FRESH_FOOD_BASE_CPH = 190.0
+COLD_CHAIN_BASE_CPH = 185.0
+BASE_REPLENISHMENT_MPH = 14.0
+MAX_SHIFT_HOURS = 11.0
 
-st.title("🏭 Shipping Department Performance Forecasting")
-st.caption("Active Configurations: 11h Shifts Max | Base Standards: Fresh Food = 190 CPH, Frozen Food = 185 CPH | Replen Standard: 14 Moves/Hour")
+st.title("🏭 Operations Analytics & Performance Dashboard")
+
+st.caption(
+    "Interactive workforce planning and performance projection tool | "
+    "Illustrative operational standards and data"
+)
 
 st.markdown("---")
 
-# --- CONTROL ROOM: STEP 1 PERFORMANCE & TIMING SLIDERS AT THE TOP ---
-st.markdown("### ⚙️ Step 1: Forecast Shift Run-Time Plan & Commodity Performance ")
-col_slider_time, col_slider_mp, col_slider_fdd = st.columns([1.2, 1, 1])
+st.markdown("### ⚙️ Step 1: Set Performance & Timing Assumptions")
 
-with col_slider_time:
+col_time, col_fresh, col_cold = st.columns([1.2, 1, 1])
+
+with col_time:
+
     target_active_hours = st.slider(
-        "Target Active Production Run-Time (Hours):",
-        min_value=4.0, max_value=12.0, value=9.0, step=0.5,
-        help="Adjust this parameter to see how changing your intended work duration window scales your required crew size."
+        "Target Active Production Run-Time (Hours)",
+        min_value=4.0,
+        max_value=float(MAX_SHIFT_HOURS),
+        value=9.0,
+        step=0.5,
+        help=(
+            "Adjust the intended active production window. "
+            "The model uses this value to estimate required staffing."
+        )
     )
 
-with col_slider_mp:
-    mp_perf_contingency = st.slider(
-        "Expected Meat and Produce Team Pace (%):",
-        min_value=50, max_value=160, value=120, step=5,
-        help="Standard = 100%. Shift 5 fresh lines typically trend at a higher 120%+ velocity index."
-    )
-    mp_multiplier = mp_perf_contingency / 100.0 # Example/demo value
+with col_fresh:
 
-with col_slider_fdd:
-    fdd_perf_contingency = st.slider(
-        "Expected Freezer/DairyDeli Team Pace (%):",
-        min_value=50, max_value=160, value=100, step=5,
-        help="Standard = 100%. Heavy cube cold-chain zones typically run closer to baseline limits."
+    fresh_food_performance_pct = st.slider(
+        "Fresh Food Expected Performance (%)",
+        min_value=50,
+        max_value=160,
+        value=120,
+        step=5,
+        help=(
+            "Adjust expected performance relative to the "
+            "illustrative baseline standard."
+        )
     )
-    fdd_multiplier = fdd_perf_contingency / 100.0 # Example/demo value
+
+    fresh_food_multiplier = fresh_food_performance_pct / 100.0
+
+with col_cold:
+
+    cold_chain_performance_pct = st.slider(
+        "Cold Chain Expected Performance (%)",
+        min_value=50,
+        max_value=160,
+        value=100,
+        step=5,
+        help=(
+            "Adjust expected performance relative to the "
+            "illustrative baseline standard."
+        )
+    )
+
+    cold_chain_multiplier = cold_chain_performance_pct / 100.0
 
 st.markdown("---")
 
-# --- LIVE FREIGHT & MANPOWER ENTRY GRID ---
-st.markdown("### 📊 Step 2: Input Daily Outbound Case Volumes, Replenishment Moves, & Split Support Headcounts")
-col_in_cases, col_in_moves, col_in_support_mp, col_in_support_fdd = st.columns(4)
+st.markdown("### 📊 Step 2: Enter Daily Operational Inputs")
 
-with col_in_cases:
+col_cases, col_moves, col_fresh_support, col_cold_support = st.columns(4)
+
+with col_cases:
+
     st.markdown("#### 📦 Outbound Case Volumes")
-    mp_cases = st.number_input("Meat & Produce Cases:", min_value=1000, max_value=250000, value=38500, step=1000)
-    fdd_cases = st.number_input("Freezer, Dairy, Deli Cases:", min_value=1000, max_value=250000, value=31500, step=1000)
-    total_cases = mp_cases + fdd_cases
 
-with col_in_moves:
+    fresh_food_cases = st.number_input(
+        "Fresh Food Cases",
+        min_value=1000,
+        max_value=250000,
+        value=38500,
+        step=1000
+    )
+
+    cold_chain_cases = st.number_input(
+        "Cold Chain Cases",
+        min_value=1000,
+        max_value=250000,
+        value=31500,
+        step=1000
+    )
+
+with col_moves:
+
     st.markdown("#### 🚜 Replenishment Moves")
-    meat_moves = st.number_input("Expected Meat Lift Moves:", min_value=0, max_value=1000, value=330, step=10)
-    produce_moves = st.number_input("Expected Produce Lift Moves:", min_value=0, max_value=1000, value=410, step=10)
-    dairy_deli_moves = st.number_input("Expected Dairy/Deli Lift Moves:", min_value=0, max_value=1000, value=180, step=10)
-    freezer_moves = st.number_input("Expected Freezer Lift Moves:", min_value=0, max_value=1000, value=157, step=10)
-    total_moves = meat_moves + produce_moves + dairy_deli_moves + freezer_moves
 
-with col_in_support_mp:
-    st.markdown("#### 🥩 Meat and Produce Support Headcount")
-    mp_loaders = st.number_input("Meat and Produce Outbound Dock Loaders:", min_value=0, max_value=50, value=3, step=1)
-    mp_wrappers = st.number_input("Meat and Produce Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    mp_chase = st.number_input("Meat and Produce Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
-    total_mp_support = int(mp_loaders + mp_wrappers + mp_chase)
+    meat_moves = st.number_input(
+        "Meat Replenishment Moves",
+        min_value=0,
+        max_value=1000,
+        value=330,
+        step=10
+    )
 
-with col_in_support_fdd:
-    st.markdown("#### ❄️ Freezer/DairyDeli Support Headcount")
-    fdd_loaders = st.number_input("Freezer/DairyDeli OutBound Dock Loaders:", min_value=0, max_value=50, value=1, step=1)
-    fdd_wrappers = st.number_input("Freezer/DairyDeli Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    fdd_chase = st.number_input("Freezer/DairyDeli Chase Runners:", min_value=0, max_value=10, value=1, step=1)
-    total_fdd_support = int(fdd_loaders + fdd_wrappers + fdd_chase)
+    produce_moves = st.number_input(
+        "Produce Replenishment Moves",
+        min_value=0,
+        max_value=1000,
+        value=410,
+        step=10
+    )
+
+    dairy_deli_moves = st.number_input(
+        "Dairy & Deli Replenishment Moves",
+        min_value=0,
+        max_value=1000,
+        value=180,
+        step=10
+    )
+
+    frozen_moves = st.number_input(
+        "Frozen Replenishment Moves",
+        min_value=0,
+        max_value=1000,
+        value=157,
+        step=10
+    )
+
+with col_fresh_support:
+
+    st.markdown("#### 🥩 Fresh Food Support Staff")
+
+    fresh_food_loaders = st.number_input(
+        "Fresh Food Dock Loaders",
+        min_value=0,
+        max_value=50,
+        value=3,
+        step=1
+    )
+
+    fresh_food_wrappers = st.number_input(
+        "Fresh Food Pallet Wrappers",
+        min_value=0,
+        max_value=50,
+        value=1,
+        step=1
+    )
+
+    fresh_food_runners = st.number_input(
+        "Fresh Food Support Runners",
+        min_value=0,
+        max_value=10,
+        value=1,
+        step=1
+    )
+
+    total_fresh_food_support = int(
+        fresh_food_loaders
+        + fresh_food_wrappers
+        + fresh_food_runners
+    )
+
+with col_cold_support:
+
+    st.markdown("#### ❄️ Cold Chain Support Staff")
+
+    cold_chain_loaders = st.number_input(
+        "Cold Chain Dock Loaders",
+        min_value=0,
+        max_value=50,
+        value=1,
+        step=1
+    )
+
+    cold_chain_wrappers = st.number_input(
+        "Cold Chain Pallet Wrappers",
+        min_value=0,
+        max_value=50,
+        value=1,
+        step=1
+    )
+
+    cold_chain_runners = st.number_input(
+        "Cold Chain Support Runners",
+        min_value=0,
+        max_value=10,
+        value=1,
+        step=1
+    )
+
+    total_cold_chain_support = int(
+        cold_chain_loaders
+        + cold_chain_wrappers
+        + cold_chain_runners
+    )
 
 st.markdown("---")
 
-# --- SHIPPING WORKFORCE FORECAST MATH ENGINE ---
-live_mp_cph = MP_BASE_CPH * mp_multiplier
-live_fdd_cph = FDD_BASE_CPH * fdd_multiplier
+fresh_food_cph = (
+    FRESH_FOOD_BASE_CPH
+    * fresh_food_multiplier
+)
 
-live_mp_replen_mph = LIFT_BASE_MPH * mp_multiplier
-live_fdd_replen_mph = LIFT_BASE_MPH * fdd_multiplier
+cold_chain_cph = (
+    COLD_CHAIN_BASE_CPH
+    * cold_chain_multiplier
+)
 
-# 1. Direct Picking Labor Calculations
-mp_pick_hours_needed = mp_cases / live_mp_cph
-fdd_pick_hours_needed = fdd_cases / live_fdd_cph
-total_required_pick_hours = mp_pick_hours_needed + fdd_pick_hours_needed
+fresh_food_replenishment_mph = (
+    BASE_REPLENISHMENT_MPH
+    * fresh_food_multiplier
+)
 
-scheduled_mp_pickers = int(math.ceil(mp_pick_hours_needed / target_active_hours))
-scheduled_fdd_pickers = int(math.ceil(fdd_pick_hours_needed / target_active_hours))
-total_scheduled_pickers = int(scheduled_mp_pickers + scheduled_fdd_pickers)
+cold_chain_replenishment_mph = (
+    BASE_REPLENISHMENT_MPH
+    * cold_chain_multiplier
+)
 
-# 2. Lift Replenishment Labor Calculations (Exact Decimal Capacities)
-meat_replen_hours = meat_moves / live_mp_replen_mph
-produce_replen_hours = produce_moves / live_mp_replen_mph
-dairy_deli_replen_hours = dairy_deli_moves / live_fdd_replen_mph
-freezer_replen_hours = freezer_moves / live_fdd_replen_mph
-total_required_replen_hours = meat_replen_hours + produce_replen_hours + dairy_deli_replen_hours + freezer_replen_hours
+fresh_food_pick_hours = (
+    fresh_food_cases / fresh_food_cph
+)
 
-scheduled_meat_lifts = round(float(meat_replen_hours / target_active_hours), 1)
-scheduled_produce_lifts = round(float(produce_replen_hours / target_active_hours), 1)
-scheduled_dairy_deli_lifts = round(float(dairy_deli_replen_hours / target_active_hours), 1)
-scheduled_freezer_lifts = round(float(freezer_replen_hours / target_active_hours), 1)
-total_scheduled_lifts = round(float(total_required_replen_hours / target_active_hours), 1)
+cold_chain_pick_hours = (
+    cold_chain_cases / cold_chain_cph
+)
 
-# 3. Calculate Projected Shift Length
-if total_scheduled_pickers > 0:
-    expected_shift_length_hours = (total_required_pick_hours / total_scheduled_pickers) + 1.0 
+total_required_pick_hours = (
+    fresh_food_pick_hours
+    + cold_chain_pick_hours
+)
+
+required_fresh_food_pickers = int(
+    math.ceil(
+        fresh_food_pick_hours
+        / target_active_hours
+    )
+)
+
+required_cold_chain_pickers = int(
+    math.ceil(
+        cold_chain_pick_hours
+        / target_active_hours
+    )
+)
+
+total_required_pickers = (
+    required_fresh_food_pickers
+    + required_cold_chain_pickers
+)
+
+meat_replenishment_hours = (
+    meat_moves
+    / fresh_food_replenishment_mph
+)
+
+produce_replenishment_hours = (
+    produce_moves
+    / fresh_food_replenishment_mph
+)
+
+dairy_deli_replenishment_hours = (
+    dairy_deli_moves
+    / cold_chain_replenishment_mph
+)
+
+frozen_replenishment_hours = (
+    frozen_moves
+    / cold_chain_replenishment_mph
+)
+
+total_required_replenishment_hours = (
+    meat_replenishment_hours
+    + produce_replenishment_hours
+    + dairy_deli_replenishment_hours
+    + frozen_replenishment_hours
+)
+
+required_meat_replenishment_staff = round(
+    meat_replenishment_hours
+    / target_active_hours,
+    1
+)
+
+required_produce_replenishment_staff = round(
+    produce_replenishment_hours
+    / target_active_hours,
+    1
+)
+
+required_dairy_deli_replenishment_staff = round(
+    dairy_deli_replenishment_hours
+    / target_active_hours,
+    1
+)
+
+required_frozen_replenishment_staff = round(
+    frozen_replenishment_hours
+    / target_active_hours,
+    1
+)
+
+total_required_replenishment_staff = round(
+    total_required_replenishment_hours
+    / target_active_hours,
+    1
+)
+
+if total_required_pickers > 0:
+
+    projected_shift_hours = (
+        total_required_pick_hours
+        / total_required_pickers
+    ) + 1.0
+
 else:
-    expected_shift_length_hours = 0.0
-hours_int = int(expected_shift_length_hours)
-mins_int = int((expected_shift_length_hours - hours_int) * 60)
 
-# 4. REFINED COMMODITY CPH MATHEMATICS
-active_run_hours = max(0.0, expected_shift_length_hours - 1.0)
+    projected_shift_hours = 0.0
 
-mp_active_labor_hours = (scheduled_mp_pickers + total_mp_support) * active_run_hours
-fdd_active_labor_hours = (scheduled_fdd_pickers + total_fdd_support) * active_run_hours
+projected_shift_hours = min(
+    projected_shift_hours,
+    MAX_SHIFT_HOURS
+)
 
-expected_mp_cph = mp_cases / mp_active_labor_hours if mp_active_labor_hours > 0 else 0.0
-expected_fdd_cph = fdd_cases / fdd_active_labor_hours if fdd_active_labor_hours > 0 else 0.0
+shift_hours = int(projected_shift_hours)
 
-# --- CORE SUMMARY KPI METRICS BAR ---
+shift_minutes = int(
+    (projected_shift_hours - shift_hours)
+    * 60
+)
+
+active_run_hours = max(
+    0.0,
+    projected_shift_hours - 1.0
+)
+
+fresh_food_active_labor_hours = (
+    required_fresh_food_pickers
+    + total_fresh_food_support
+) * active_run_hours
+
+cold_chain_active_labor_hours = (
+    required_cold_chain_pickers
+    + total_cold_chain_support
+) * active_run_hours
+
+projected_fresh_food_cph = (
+    fresh_food_cases
+    / fresh_food_active_labor_hours
+    if fresh_food_active_labor_hours > 0
+    else 0.0
+)
+
+projected_cold_chain_cph = (
+    cold_chain_cases
+    / cold_chain_active_labor_hours
+    if cold_chain_active_labor_hours > 0
+    else 0.0
+)
+
 st.markdown("### 🧮 Step 3: Performance Projections")
+
 kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
 
 with kpi1:
-    st.metric(label="Total Required Pickers", value=f"{total_scheduled_pickers} Order-Fillers")
-with kpi2:
-    st.metric(label="Total Required Lifts", value=f"{total_scheduled_lifts} Lift Drivers")
 
-# Color setups
-mp_color = "#15803d" if expected_mp_cph >= 190.0 else "#9b1c1c"
-mp_bg = "#dcfce7" if expected_mp_cph >= 190.0 else "#fde8e8"
-
-fdd_color = "#15803d" if expected_fdd_cph >= 185.0 else "#9b1c1c"
-fdd_bg = "#dcfce7" if expected_fdd_cph >= 185.0 else "#fde8e8"
-
-final_mp_val = str(round(expected_mp_cph, 1))
-final_fdd_val = str(round(expected_fdd_cph, 1))
-
-with kpi3:
-    st.html(
-        f'<div style="background-color: {mp_bg}; border: 2px solid {mp_color}; border-radius: 8px; padding: 12px; text-align: center;">'
-        f'<p style="margin: 0; font-size: 13px; color: #4b5563; font-weight: 500;">Expected MP Shipping CPH</p>'
-        f'<h2 style="margin: 4px 0 0 0; color: {mp_color}; font-size: 24px; font-weight: 700;">{final_mp_val} CPH</h2>'
-        f'</div>'
+    st.metric(
+        label="Required Pickers",
+        value=f"{total_required_pickers}"
     )
 
-with kpi4:
+with kpi2:
+
+    st.metric(
+        label="Required Replenishment Staff",
+        value=f"{total_required_replenishment_staff}"
+    )
+
+fresh_food_color = (
+    "#15803d"
+    if projected_fresh_food_cph >= FRESH_FOOD_BASE_CPH
+    else "#9b1c1c"
+)
+
+fresh_food_background = (
+    "#dcfce7"
+    if projected_fresh_food_cph >= FRESH_FOOD_BASE_CPH
+    else "#fde8e8"
+)
+
+with kpi3:
+
     st.html(
-        f'<div style="background-color: {fdd_bg}; border: 2px solid {fdd_color}; border-radius: 8px; padding: 12px; text-align: center;">'
-        f'<p style="margin: 0; font-size: 13px; color: #4b5563; font-weight: 500;">Expected FDD Shipping CPH</p>'
-        f'<h2 style="margin: 4px 0 0 0; color: {fdd_color}; font-size: 24px; font-weight: 700;">{final_fdd_val} CPH</h2>'
-        f'</div>'
+        f"""
+        <div style="
+            background-color: {fresh_food_background};
+            border: 2px solid {fresh_food_color};
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        ">
+            <p style="
+                margin: 0;
+                font-size: 13px;
+                color: #4b5563;
+                font-weight: 500;
+            ">
+                Projected Fresh Food CPH
+            </p>
+
+            <h2 style="
+                margin: 4px 0 0 0;
+                color: {fresh_food_color};
+                font-size: 24px;
+                font-weight: 700;
+            ">
+                {projected_fresh_food_cph:.1f} CPH
+            </h2>
+        </div>
+        """
+    )
+
+cold_chain_color = (
+    "#15803d"
+    if projected_cold_chain_cph >= COLD_CHAIN_BASE_CPH
+    else "#9b1c1c"
+)
+
+cold_chain_background = (
+    "#dcfce7"
+    if projected_cold_chain_cph >= COLD_CHAIN_BASE_CPH
+    else "#fde8e8"
+)
+
+with kpi4:
+
+    st.html(
+        f"""
+        <div style="
+            background-color: {cold_chain_background};
+            border: 2px solid {cold_chain_color};
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        ">
+            <p style="
+                margin: 0;
+                font-size: 13px;
+                color: #4b5563;
+                font-weight: 500;
+            ">
+                Projected Cold Chain CPH
+            </p>
+
+            <h2 style="
+                margin: 4px 0 0 0;
+                color: {cold_chain_color};
+                font-size: 24px;
+                font-weight: 700;
+            ">
+                {projected_cold_chain_cph:.1f} CPH
+            </h2>
+        </div>
+        """
     )
 
 with kpi5:
-    st.metric(label="Projected Shift Length", value=f"{hours_int}h {mins_int}m")
+
+    st.metric(
+        label="Projected Shift Length",
+        value=f"{shift_hours}h {shift_minutes}m"
+    )
 
 st.markdown("---")
 
-# --- CONSOLIDATED CROSS-COMMODITY ROSTER TARGETS ---
-st.subheader("📋 Floor Management Production Analysis")
+st.subheader("📋 Operational Production Analysis")
 
-# CLEAN RE-MAPPED COMPILING DICTIONARY MATRIX
-blueprint_matrix = [
-    {"Commodity Zone Area": "Meat (M)", "Pacing Target Standard": f"{round(live_mp_cph)} CPH / {round(live_mp_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(mp_cases * 0.55):,} Cases", "Orderfillers Needed": f"{math.ceil((mp_pick_hours_needed * 0.55) / target_active_hours)} Staff", "Replen Moves Count": f"{meat_moves} Moves", "Replen Drivers Needed": f"{scheduled_meat_lifts} Lifts"},
-    {"Commodity Zone Area": "Produce (P)", "Pacing Target Standard": f"{round(live_mp_cph)} CPH / {round(live_mp_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(mp_cases * 0.45):,} Cases", "Orderfillers Needed": f"{math.ceil((mp_pick_hours_needed * 0.45) / target_active_hours)} Staff", "Replen Moves Count": f"{produce_moves} Moves", "Replen Drivers Needed": f"{scheduled_produce_lifts} Lifts"},
-    {"Commodity Zone Area": "Dairy & Deli (DD)", "Pacing Target Standard": f"{round(live_fdd_cph)} CPH / {round(live_fdd_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(fdd_cases * 0.55):,} Cases", "Orderfillers Needed": f"{math.ceil((fdd_pick_hours_needed * 0.55) / target_active_hours)} Staff", "Replen Moves Count": f"{dairy_deli_moves} Moves", "Replen Drivers Needed": f"{scheduled_dairy_deli_lifts} Lifts"},
-    {"Commodity Zone Area": "Freezer (F)", "Pacing Target Standard": f"{round(live_fdd_cph)} CPH / {round(live_fdd_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(fdd_cases * 0.45):,} Cases", "Orderfillers Needed": f"{math.ceil((fdd_pick_hours_needed * 0.45) / target_active_hours)} Staff", "Replen Moves Count": f"{freezer_moves} Moves", "Replen Drivers Needed": f"{scheduled_freezer_lifts} Lifts"},
+fresh_food_meat_cases = int(
+    fresh_food_cases * 0.55
+)
+
+fresh_food_produce_cases = int(
+    fresh_food_cases * 0.45
+)
+
+cold_chain_dairy_deli_cases = int(
+    cold_chain_cases * 0.55
+)
+
+cold_chain_frozen_cases = int(
+    cold_chain_cases * 0.45
+)
+
+production_matrix = [
+
+    {
+        "Operational Area": "Meat",
+
+        "Performance Standard":
+            f"{round(fresh_food_cph)} CPH / "
+            f"{round(fresh_food_replenishment_mph, 1)} MPH",
+
+        "Outbound Case Load":
+            f"{fresh_food_meat_cases:,} Cases",
+
+        "Order Fillers Needed":
+            f"{math.ceil((fresh_food_pick_hours * 0.55) / target_active_hours)} Staff",
+
+        "Replenishment Moves":
+            f"{meat_moves} Moves",
+
+        "Replenishment Staff":
+            f"{required_meat_replenishment_staff} Staff"
+    },
+
+    {
+        "Operational Area": "Produce",
+
+        "Performance Standard":
+            f"{round(fresh_food_cph)} CPH / "
+            f"{round(fresh_food_replenishment_mph, 1)} MPH",
+
+        "Outbound Case Load":
+            f"{fresh_food_produce_cases:,} Cases",
+
+        "Order Fillers Needed":
+            f"{math.ceil((fresh_food_pick_hours * 0.45) / target_active_hours)} Staff",
+
+        "Replenishment Moves":
+            f"{produce_moves} Moves",
+
+        "Replenishment Staff":
+            f"{required_produce_replenishment_staff} Staff"
+    },
+
+    {
+        "Operational Area": "Dairy & Deli",
+
+        "Performance Standard":
+            f"{round(cold_chain_cph)} CPH / "
+            f"{round(cold_chain_replenishment_mph, 1)} MPH",
+
+        "Outbound Case Load":
+            f"{cold_chain_dairy_deli_cases:,} Cases",
+
+        "Order Fillers Needed":
+            f"{math.ceil((cold_chain_pick_hours * 0.55) / target_active_hours)} Staff",
+
+        "Replenishment Moves":
+            f"{dairy_deli_moves} Moves",
+
+        "Replenishment Staff":
+            f"{required_dairy_deli_replenishment_staff} Staff"
+    },
+
+    {
+        "Operational Area": "Frozen",
+
+        "Performance Standard":
+            f"{round(cold_chain_cph)} CPH / "
+            f"{round(cold_chain_replenishment_mph, 1)} MPH",
+
+        "Outbound Case Load":
+            f"{cold_chain_frozen_cases:,} Cases",
+
+        "Order Fillers Needed":
+            f"{math.ceil((cold_chain_pick_hours * 0.45) / target_active_hours)} Staff",
+
+        "Replenishment Moves":
+            f"{frozen_moves} Moves",
+
+        "Replenishment Staff":
+            f"{required_frozen_replenishment_staff} Staff"
+    }
 ]
-st.dataframe(pd.DataFrame(blueprint_matrix), use_container_width=True, hide_index=True)
+
+st.dataframe(
+    pd.DataFrame(production_matrix),
+    use_container_width=True,
+    hide_index=True
+)
+
+st.markdown("---")
+
+st.caption(
+    "Portfolio project using illustrative operational standards and "
+    "simulated planning inputs. Designed for demonstration of Python, "
+    "Streamlit, data analysis, and operational decision-support concepts."
+)
+```
