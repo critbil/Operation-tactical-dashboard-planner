@@ -7,10 +7,10 @@ st.set_page_config(page_title="Perishable Shipping Performance Planner", layout=
 is_shared_view = st.query_params.get("mode") == "shared"
 
 # --- GLOBAL STATIC OPERATIONAL PARAMETERS ---
-MP_BASE_CPH = 190.0
-FDD_BASE_CPH = 185.0
-LIFT_BASE_MPH = 14.0
-PAID_SHIFT_HOURS = 11.0
+MP_BASE_CPH = 190.0 # Example/demo value
+FDD_BASE_CPH = 185.0 # Example/demo value
+LIFT_BASE_MPH = 14.0 # Example/demo value
+PAID_SHIFT_HOURS = 11.0 # Example/demo value
 
 st.title("🏭 Shipping Department Performance Forecasting")
 st.caption("Active Configurations: 11h Shifts Max | Base Standards: MP = 190 CPH, FDD = 185 CPH | Replen Standard: 14 Moves/Hour")
@@ -34,7 +34,7 @@ with col_slider_mp:
         min_value=50, max_value=160, value=120, step=5,
         help="Standard = 100%. Shift 5 fresh lines typically trend at a higher 120%+ velocity index."
     )
-    mp_multiplier = mp_perf_contingency / 100.0
+    mp_multiplier = mp_perf_contingency / 100.0 # Example/demo value
 
 with col_slider_fdd:
     fdd_perf_contingency = st.slider(
@@ -42,7 +42,7 @@ with col_slider_fdd:
         min_value=50, max_value=160, value=100, step=5,
         help="Standard = 100%. Heavy cube cold-chain zones typically run closer to baseline limits."
     )
-    fdd_multiplier = fdd_perf_contingency / 100.0
+    fdd_multiplier = fdd_perf_contingency / 100.0 # Example/demo value
 
 st.markdown("---")
 
