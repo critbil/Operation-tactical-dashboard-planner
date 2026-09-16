@@ -594,4 +594,4 @@ st.caption(
     "simulated planning inputs. Designed for demonstration of Python, "
     "Streamlit, data analysis, and operational decision-support concepts."
 )
-```
+
