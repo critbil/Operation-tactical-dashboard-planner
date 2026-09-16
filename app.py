@@ -163,3 +163,4 @@ st.subheader("📋 Total Shipping Department Roster")
 total_all_staff = total_scheduled_pickers + total_scheduled_lifts + total_mp_support + total_fdd_support
 roster_matrix = [
     {"Shipping Department Roles": "Orderfillers (Direct Pickers)", "Scheduled Headcount Pool": f"{total_scheduled_pickers} Staff", "Paid Hours Pool": f"{total_scheduled_pickers * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
+]
