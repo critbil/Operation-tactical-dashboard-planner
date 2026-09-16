@@ -18,7 +18,7 @@ st.caption("Active Configurations: 11h Shifts Max | Base Standards: MP = 190 CPH
 st.markdown("---")
 
 # --- CONTROL ROOM: STEP 1 PERFORMANCE & TIMING SLIDERS AT THE TOP ---
-st.markdown("### ⚙️ Step 1: Configure Shift Run-Time Plan & Commodity Performance Sliders")
+st.markdown("### ⚙️ Step 1: Forecast Shift Run-Time Plan & Commodity Performance ")
 col_slider_time, col_slider_mp, col_slider_fdd = st.columns([1.2, 1, 1])
 
 with col_slider_time:
