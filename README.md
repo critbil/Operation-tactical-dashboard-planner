@@ -1,8 +1,6 @@
 # Operations Analytics Dashboard Planner
 
-## 🚀 Live Dashboard
-
-[View the Live Dashboard](https://operations-analytics-dashboard-planner-mndoznzswtjdb4cbwzhvct.streamlit.app/)
+[🚀View the Live Dashboard](https://operations-analytics-dashboard-planner-mndoznzswtjdb4cbwzhvct.streamlit.app/)
 
 ## 📊 Project Overview
 
