@@ -58,7 +58,6 @@ with col_in_moves:
 
 with col_in_support:
     st.markdown("### 🛠️ Standard Support Headcount")
-    # MANAGERS INPUT THEIR OWN LIVE STAFFING FOR SUPPORT POSITIONS HERE
     loaders_count = st.number_input("Actual Scheduled Outbound Dock Loaders:", min_value=0, max_value=50, value=4, step=1)
     wrappers_count = st.number_input("Actual Scheduled Pallet Wrappers:", min_value=0, max_value=50, value=2, step=1)
     chase_count = st.number_input("Actual Scheduled Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
@@ -103,12 +102,11 @@ mins_int = int((expected_shift_length_hours - hours_int) * 60)
 
 # 4. Total Combined Building Burden Pool Compilation Math
 total_building_headcount = total_scheduled_pickers + total_scheduled_lifts + total_fixed_support_headcount
-# Total active working hours = Picker active hours + Lift active hours + Support active hours (paid hours minus 1hr break)
 total_building_active_hours = (total_scheduled_pickers * (expected_shift_length_hours - 1.0)) + \
                                (total_scheduled_lifts * (expected_shift_length_hours - 1.0)) + \
                                (total_fixed_support_headcount * (expected_shift_length_hours - 1.0))
 
-# 5. THE OUTPUT METRIC: True Burdened Expected Building CPH for the Day
+# 5. True Burdened Expected Building CPH for the Day
 if total_building_active_hours > 0:
     expected_building_cph = total_cases / total_building_active_hours
 else:
@@ -124,11 +122,10 @@ with kpi2:
 with kpi3:
     st.metric(label="Total Expected Moves", value=f"{total_moves} Pallets")
 with kpi4:
-    # EXPECTED BUILDING CPH METRIC CARD OUTPUT
     st.metric(
         label="Expected Daily Building CPH", 
         value=f"{round(expected_building_cph, 1)} CPH",
-        help="Efficiency Index: Total Outbound Cases divided by Total Active Department Hours Pool (Pickers + Lift Drivers + Loaders + Wrappers + Chase Runners)."
+        help="Total Outbound Cases divided by Total Active Department Hours Pool (Pickers + Lift Drivers + Loaders + Wrappers + Chase Runners)."
     )
 with kpi5:
     st.metric(label="Projected Roster Run-Time", value=f"{hours_int}h {mins_int}m")
@@ -155,3 +152,4 @@ roster_matrix = [
     {"Shipping Department Role Block": "Forklift Operators (Replen Drivers)", "Scheduled Headcount Pool": f"{total_scheduled_lifts} Staff", "Paid Hours Burden Pool": f"{total_scheduled_lifts * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Variable (Exact Decimal Capacities)"},
     {"Shipping Department Role Block": "Outbound Dock Loaders", "Scheduled Headcount Pool": f"{loaders_count} Staff", "Paid Hours Burden Pool": f"{loaders_count * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (Manager Manual Input)"},
     {"Shipping Department Role Block": "Pallet Wrappers", "Scheduled Headcount Pool": f"{wrappers_count} Staff", "Paid Hours Burden Pool": f"{wrappers_count * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (Manager Manual Input)"},
+    {"Shipping Department Role Block": "Outbound Chase Runners", "Scheduled Headcount Pool": f"{chase_count} Staff", "Paid Hours Burden Pool": f"{chase_count * PAID_SHIFT_HOURS} Hrs", "Role Allocation Type": "Shift Standard (Manager Manual Input)"},
