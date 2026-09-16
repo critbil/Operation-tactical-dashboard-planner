@@ -52,8 +52,8 @@ col_in_cases, col_in_moves, col_in_support_mp, col_in_support_fdd = st.columns(4
 
 with col_in_cases:
     st.markdown("#### 📦 Outbound Case Volumes")
-    mp_cases = st.number_input("Meat & Produce (MP) Cases:", min_value=1000, max_value=250000, value=38500, step=1000)
-    fdd_cases = st.number_input("Freezer, Dairy, Deli (FDD) Cases:", min_value=1000, max_value=250000, value=31500, step=1000)
+    mp_cases = st.number_input("Meat & Produce Cases:", min_value=1000, max_value=250000, value=38500, step=1000)
+    fdd_cases = st.number_input("Freezer, Dairy, Deli Cases:", min_value=1000, max_value=250000, value=31500, step=1000)
     total_cases = mp_cases + fdd_cases
 
 with col_in_moves:
@@ -65,17 +65,17 @@ with col_in_moves:
     total_moves = meat_moves + produce_moves + dairy_deli_moves + freezer_moves
 
 with col_in_support_mp:
-    st.markdown("#### 🥩 MP Support Headcount")
-    mp_loaders = st.number_input("MP Outbound Dock Loaders:", min_value=0, max_value=50, value=3, step=1)
-    mp_wrappers = st.number_input("MP Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    mp_chase = st.number_input("MP Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
+    st.markdown("#### 🥩 Meat and Produce Support Headcount")
+    mp_loaders = st.number_input("Meat and Produce Outbound Dock Loaders:", min_value=0, max_value=50, value=3, step=1)
+    mp_wrappers = st.number_input("Meat and Produce Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
+    mp_chase = st.number_input("Meat and Produce Outbound Chase Runners:", min_value=0, max_value=10, value=1, step=1)
     total_mp_support = int(mp_loaders + mp_wrappers + mp_chase)
 
 with col_in_support_fdd:
     st.markdown("#### ❄️ Freezer/DairyDeli Support Headcount")
-    fdd_loaders = st.number_input("FDD OutBound Dock Loaders:", min_value=0, max_value=50, value=1, step=1)
-    fdd_wrappers = st.number_input("FDD Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
-    fdd_chase = st.number_input("FDD Chase Runners:", min_value=0, max_value=10, value=1, step=1)
+    fdd_loaders = st.number_input("Freezer/DairyDeli OutBound Dock Loaders:", min_value=0, max_value=50, value=1, step=1)
+    fdd_wrappers = st.number_input("Freezer/DairyDeli Pallet Wrappers:", min_value=0, max_value=50, value=1, step=1)
+    fdd_chase = st.number_input("Freezer/DairyDeli Chase Runners:", min_value=0, max_value=10, value=1, step=1)
     total_fdd_support = int(fdd_loaders + fdd_wrappers + fdd_chase)
 
 st.markdown("---")
