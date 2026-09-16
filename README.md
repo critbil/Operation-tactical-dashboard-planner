@@ -1,13 +1,17 @@
-An interactive Streamlit dashboard designed to help floor managers plan daily shift setup and make data-driven operational decisions.
-Managers can enter key operational metrics and planning inputs to evaluate different scenarios and see expected performance outcomes. 
-The dashboard brings multiple planning metrics into one interface, helping managers assess potential performance before the shift begins.
+# Operations Analytics Dashboard Planner
 
-Interactive planning inputs: Managers can enter their own operational data.
+## 🚀 Live Dashboard
 
-Performance projections: Calculates expected performance based on entered metrics.
+[View the Interactive Streamlit Dashboard](https://operations-analytics-dashboard-planner-mndoznzswtjdb4cbwzhvct.streamlit.app/)
 
-Operational metrics: Brings multiple planning factors into one dashboard.
+## 📊 Project Overview
 
-Scenario evaluation: Allows managers to adjust inputs and see how expected performance changes.
+An interactive Streamlit dashboard designed to help floor managers
+plan daily shift setup and make data-driven operational decisions.
 
-Interactive Streamlit interface: Presents results in an accessible dashboard format.
+Managers can enter key operational metrics and planning inputs to
+evaluate different scenarios and see projected performance outcomes.
+
+The dashboard brings multiple planning metrics into one interface,
+allowing managers to assess potential performance before the shift
+begins.
