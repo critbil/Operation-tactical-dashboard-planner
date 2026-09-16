@@ -22,7 +22,7 @@ st.caption(
 
 st.markdown("---")
 
-st.markdown("### ⚙️ Step 1: Set Performance & Timing Assumptions")
+st.markdown("### ⚙️ Step 1: Set Performance & labor forecasting ")
 
 col_time, col_fresh, col_cold = st.columns([1.2, 1, 1])
 
