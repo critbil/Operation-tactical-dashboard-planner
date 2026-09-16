@@ -12,7 +12,7 @@ FDD_BASE_CPH = 185.0
 LIFT_BASE_MPH = 14.0
 PAID_SHIFT_HOURS = 11.0
 
-st.title("🏭 Shipping Department Performance Forcasting")
+st.title("🏭 Shipping Department Performance Forecasting")
 st.caption("Active Configurations: 11h Shifts Max | Base Standards: MP = 190 CPH, FDD = 185 CPH | Replen Standard: 14 Moves/Hour")
 
 st.markdown("---")
