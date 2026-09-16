@@ -152,16 +152,3 @@ blueprint_matrix = [
     {"Commodity Zone Area": "Freezer (F)", "Pacing Target Standard": f"{round(live_fdd_cph)} CPH / {round(live_fdd_replen_mph, 1)} MPH", "Outbound Case Load": f"{int(fdd_cases * 0.45):,} Cases*", "Orderfillers Needed": f"{math.ceil((fdd_pick_hours_needed * 0.45) / target_active_hours)} Staff", "Replen Moves Count": f"{freezer_moves} Moves", "Replen Drivers Needed": f"{scheduled_freezer_lifts} Lifts"},
     {"Commodity Zone Area": "📊 TOTAL ACTIVE POOL", "Pacing Target Standard": "Synchronized Matrix", "Outbound Case Load": f"{int(total_cases):,} Cases", "Orderfillers Needed": f"{total_scheduled_pickers} Pickers", "Replen Moves Count": f"{total_moves} Moves", "Replen Drivers Needed": f"{total_scheduled_lifts} Lift Drivers"}
 ]
-st.dataframe(pd.DataFrame(blueprint_matrix), use_container_width=True, hide_index=True)
-
-st.markdown("---")
-
-# --- CONSOLIDATED DEPARTMENT POOL OVERHEAD LEDGER ---
-st.subheader("📋 Total Shipping Department Roster Pool Ledger")
-# FIXED MATRIX FLOAT COMPILING TYPO
-total_all_staff = float(total_scheduled_pickers) + float(total_scheduled_lifts) + float(total_mp_support) + float(total_fdd_support)
-
-roster_matrix = [
-    {"Shipping Department Role Block": "Orderfillers (Direct Pickers)", "Scheduled Headcount Pool": f"{total_scheduled_pickers} Staff", "Paid Hours Burden Pool": f"{round(total_scheduled_pickers * PAID_SHIFT_HOURS, 1)} Hrs", "Role Allocation Type": "Variable (Picker-Gated)"},
-    {"Shipping Department Role Block": "Forklift Operators (Replen Drivers)", "Scheduled Headcount Pool": f"{total_scheduled_lifts} Staff", "Paid Hours Burden Pool": f"{round(total_scheduled_lifts * PAID_SHIFT_HOURS, 1)} Hrs", "Role Allocation Type": "Variable (Exact Decimals)"},
-]
