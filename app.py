@@ -7,10 +7,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# Operational Standards
+# Operational Standards Base Constants
 FRESH_FOOD_BASE_CPH = 190.0
 COLD_CHAIN_BASE_CPH = 185.0
-BASE_REPLENISHMENT_MPH = 14.0
 MAX_SHIFT_HOURS = 11.0
 
 # HEADER SECTION
@@ -57,6 +56,13 @@ with col_left:
                 min_value=0, max_value=50, value=20, step=5,
                 help="Non-productive warm-up breaks, meetings, etc."
             )
+            
+        # New Interactive Target for Internal Logistics Pallet Moves Goal
+        replenishment_mph_goal = st.slider(
+            "Replenishment Target Rate (Pallet Moves/Hour)",
+            min_value=5.0, max_value=30.0, value=14.0, step=0.5,
+            help="Set the targeted engineering standard for internal logistics pallet handling speed."
+        )
 
 with col_right:
     with st.container(border=True):
@@ -73,26 +79,34 @@ with col_right:
             )
         with v2:
             st.markdown("**Internal Logistics**")
-            replenishment_moves = st.number_input(
-                "Replenishment Pallet Moves", min_value=0, max_value=5000, value=450, step=25
+            fresh_replen_moves = st.number_input(
+                "Fresh Replenishment Moves", min_value=0, max_value=5000, value=250, step=25
+            )
+            cold_replen_moves = st.number_input(
+                "Cold Replenishment Moves", min_value=0, max_value=5000, value=200, step=25
             )
 
 # CALCULATIONS 
 calculated_fresh_cph = FRESH_FOOD_BASE_CPH * fresh_food_multiplier
 calculated_cold_cph = COLD_CHAIN_BASE_CPH * cold_chain_multiplier
 
-fresh_direct_hours = fresh_food_cases / calculated_fresh_cph if calculated_fresh_cph > 0 else 0.0
-cold_direct_hours = cold_chain_cases / calculated_cold_cph if calculated_cold_cph > 0 else 0.0
-replenishment_hours = replenishment_moves / BASE_REPLENISHMENT_MPH if BASE_REPLENISHMENT_MPH > 0 else 0.0
+# Split replenishment hours using user-defined slider metric
+fresh_replen_hours = fresh_replen_moves / replenishment_mph_goal if replenishment_mph_goal > 0 else 0.0
+cold_replen_hours = cold_replen_moves / replenishment_mph_goal if replenishment_mph_goal > 0 else 0.0
+total_replen_hours = fresh_replen_hours + cold_replen_hours
+
+fresh_gross_hours = fresh_direct_hours = fresh_food_cases / calculated_fresh_cph if calculated_fresh_cph > 0 else 0.0
+cold_gross_hours = cold_direct_hours = cold_chain_cases / calculated_cold_cph if calculated_cold_cph > 0 else 0.0
 
 fresh_gross_hours = fresh_direct_hours / (1 - (fresh_indirect_pct / 100.0))
 cold_gross_hours = cold_direct_hours / (1 - (cold_indirect_pct / 100.0))
-total_gross_labor_hours = fresh_gross_hours + cold_gross_hours + replenishment_hours
+total_gross_labor_hours = fresh_gross_hours + cold_gross_hours + total_replen_hours
 
 fresh_required_hc = math.ceil(fresh_gross_hours / target_active_hours) if target_active_hours > 0 else 0
 cold_required_hc = math.ceil(cold_gross_hours / target_active_hours) if target_active_hours > 0 else 0
-replen_required_hc = math.ceil(replenishment_hours / target_active_hours) if target_active_hours > 0 else 0
-total_required_hc = fresh_required_hc + cold_required_hc + replen_required_hc
+fresh_replen_hc = math.ceil(fresh_replen_hours / target_active_hours) if target_active_hours > 0 else 0
+cold_replen_hc = math.ceil(cold_replen_hours / target_active_hours) if target_active_hours > 0 else 0
+total_required_hc = fresh_required_hc + cold_required_hc + fresh_replen_hc + cold_replen_hc
 
 # ANALYTICS AND OUTPUTS 
 # Display metrics and data grid in a single clean analytics card
@@ -105,7 +119,7 @@ with st.container(border=True):
         st.metric(
             label="Total Required Headcount", 
             value=f"{total_required_hc} FTEs", 
-            delta=f"{fresh_required_hc} Fresh | {cold_required_hc} Cold",
+            delta=f"{fresh_required_hc + fresh_replen_hc} Fresh | {cold_required_hc + cold_replen_hc} Cold",
             delta_color="off"
         )
     with metric_col2:
@@ -117,14 +131,56 @@ with st.container(border=True):
 
     # Detailed Table
     summary_data = {
-        "Department": ["Fresh Food Outbound", "Cold Chain Outbound", "Replenishment Logistics", "Total Operation"],
-        "Volume / Units": [f"{fresh_food_cases:,} Cases", f"{cold_chain_cases:,} Cases", f"{replenishment_moves:,} Moves", "-"],
-        "Target Rate": [f"{calculated_fresh_cph:.1f} CPH", f"{calculated_cold_cph:.1f} CPH", f"{BASE_REPLENISHMENT_MPH:.1f} MPH", "-"],
-        "Direct Hours": [f"{fresh_direct_hours:.1f}", f"{cold_direct_hours:.1f}", f"{replenishment_hours:.1f}", f"{fresh_direct_hours + cold_direct_hours + replenishment_hours:.1f}"],
-        "Indirect Allowance": [f"{fresh_indirect_pct}%", f"{cold_indirect_pct}%", "0%", "-"],
-        "Gross Hours Required": [f"{fresh_gross_hours:.1f}", f"{cold_gross_hours:.1f}", f"{replenishment_hours:.1f}", f"{total_gross_labor_hours:.1f}"],
-        "Estimated Staffing (FTEs)": [fresh_required_hc, cold_required_hc, replen_required_hc, total_required_hc]
+        "Department": [
+            "Fresh Food Outbound", 
+            "Cold Chain Outbound", 
+            "Fresh Replenishment Logistics", 
+            "Cold Replenishment Logistics", 
+            "Total Operation"
+        ],
+        "Volume / Units": [
+            f"{fresh_food_cases:,} Cases", 
+            f"{cold_chain_cases:,} Cases", 
+            f"{fresh_replen_moves:,} Moves", 
+            f"{cold_replen_moves:,} Moves", 
+            "-"
+        ],
+        "Target Rate": [
+            f"{calculated_fresh_cph:.1f} CPH", 
+            f"{calculated_cold_cph:.1f} CPH", 
+            f"{replenishment_mph_goal:.1f} MPH", 
+            f"{replenishment_mph_goal:.1f} MPH", 
+            "-"
+        ],
+        "Direct Hours": [
+            f"{fresh_direct_hours:.1f}", 
+            f"{cold_direct_hours:.1f}", 
+            f"{fresh_replen_hours:.1f}", 
+            f"{cold_replen_hours:.1f}", 
+            f"{fresh_direct_hours + cold_direct_hours + total_replen_hours:.1f}"
+        ],
+        "Indirect Allowance": [
+            f"{fresh_indirect_pct}%", 
+            f"{cold_indirect_pct}%", 
+            "0%", 
+            "0%", 
+            "-"
+        ],
+        "Gross Hours Required": [
+            f"{fresh_gross_hours:.1f}", 
+            f"{cold_gross_hours:.1f}", 
+            f"{fresh_replen_hours:.1f}", 
+            f"{cold_replen_hours:.1f}", 
+            f"{total_gross_labor_hours:.1f}"
+        ],
+        "Estimated Staffing (FTEs)": [
+            fresh_required_hc, 
+            cold_required_hc, 
+            fresh_replen_hc, 
+            cold_replen_hc, 
+            total_required_hc
+        ]
     }
     
-    st.markdown("---") # This remaining line separating KPI cards from data is standard and clean
+    st.markdown("---") 
     st.dataframe(pd.DataFrame(summary_data), use_container_width=True, hide_index=True)
