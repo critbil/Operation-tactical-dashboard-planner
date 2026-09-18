@@ -13,12 +13,12 @@ COLD_CHAIN_BASE_CPH = 185.0
 BASE_REPLENISHMENT_MPH = 14.0
 MAX_SHIFT_HOURS = 11.0
 
-# --- HEADER SECTION ---
+# HEADER SECTION
 st.title("🏭 Operations Analytics & Performance Dashboard")
 st.caption("Interactive workforce planning and performance projection tool | Illustrative operational standards")
 
-# --- MAIN CONTROLS WORKSPACE ---
-# Split the entire input zone into two clean side-by-side container cards
+# MAIN CONTROLS
+# Split the entire input zone into two clean side-by-side containers
 col_left, col_right = st.columns(2)
 
 with col_left:
@@ -77,7 +77,7 @@ with col_right:
                 "Replenishment Pallet Moves", min_value=0, max_value=5000, value=450, step=25
             )
 
-# --- CALCULATIONS ENGINE ---
+# CALCULATIONS 
 calculated_fresh_cph = FRESH_FOOD_BASE_CPH * fresh_food_multiplier
 calculated_cold_cph = COLD_CHAIN_BASE_CPH * cold_chain_multiplier
 
@@ -94,7 +94,7 @@ cold_required_hc = math.ceil(cold_gross_hours / target_active_hours) if target_a
 replen_required_hc = math.ceil(replenishment_hours / target_active_hours) if target_active_hours > 0 else 0
 total_required_hc = fresh_required_hc + cold_required_hc + replen_required_hc
 
-# --- ANALYTICS & OUTPUTS SECTION ---
+# ANALYTICS AND OUTPUTS 
 # Display metrics and data grid in a single clean analytics card
 with st.container(border=True):
     st.markdown("### 📈 Labor Requirements & Performance Analytics")
